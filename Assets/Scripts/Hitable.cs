@@ -8,31 +8,67 @@ public struct hit_record
     public float t;
     public Vector3 p;
     public Vector3 normal;
+    public zMaterial mat;
+}
+
+public class zRay
+{
+    private Vector3 A, B;
+
+    public zRay() { }
+
+    public zRay(Vector3 a, Vector3 b)
+    {
+        A = a;
+        B = b;
+    }
+
+    public Vector3 origin
+    {
+        get
+        {
+            return A;
+        }
+    }
+
+    public Vector3 direction
+    {
+        get
+        {
+            return B.normalized;
+        }
+    }
+
+    public Vector3 point_at_parameter(float t)
+    {
+        return A + t * B.normalized;
+    }
 }
 
 public abstract class Hitable {
-
+    public zMaterial material;
     public abstract bool hit(zRay r, float t_min, float t_max, ref hit_record rec);
 }
 
 public class sphere : Hitable
 {
     public Vector3 center;
-    public float radius;
+    public float radius; 
 
-    public sphere(Vector3 cen, float r)
+    public sphere(Vector3 cen, float r, zMaterial mat)
     {
         center = cen;
         radius = r;
+        material = mat;
     }
 
     public override bool hit(zRay r, float t_min, float t_max, ref hit_record rec)
     {
         Vector3 oc = r.origin - center;
         float a = Vector3.Dot(r.direction, r.direction);
-        float b = 2f * Vector3.Dot(oc, r.direction);
+        float b = Vector3.Dot(oc, r.direction);
         float c = Vector3.Dot(oc, oc) - radius * radius;
-        float discriminant = b * b - 4 * a * c;
+        float discriminant = b * b - a * c;
         if(discriminant > 0)
         {
             float temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
@@ -76,6 +112,7 @@ public class hitable_list : Hitable
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
                 rec = temp_rec;
+                rec.mat = list[i].material;
             }
         }
         return hit_anything;
