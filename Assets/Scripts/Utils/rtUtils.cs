@@ -8,6 +8,11 @@ public static class rtUtils
         return new Color(vec3.x, vec3.y, vec3.z);
     }
 
+    public static Vector3 ToVector3(this Color col)
+    {
+        return new Vector3(col.r, col.g, col.b);
+    }
+
     public static bool refract(this Vector3 v, Vector3 n, float ni_over_nt, ref Vector3 refracted)
     {
         Vector3 uv = v.normalized;

@@ -15,7 +15,10 @@ public class MainLoop : MonoBehaviour {
     private int startTime;
     private int timePassed;
     private bool renderDone;
-	void Start () {
+
+    private Hitable world;
+
+    void Start () {
         cam = GetComponent<Camera>();
 
         cb_output = new CommandBuffer();
@@ -24,6 +27,15 @@ public class MainLoop : MonoBehaviour {
 
         rtResult = new Texture2D(Screen.width, Screen.height);
         rtResult.name = "ResultTexture";
+
+        rtObject[] objs = GameObject.FindObjectsOfType<rtObject>();
+        List<Hitable> list = new List<Hitable>();
+        foreach(var obj in objs)
+        {
+            list.Add(obj.toSphere());
+        }
+        world = new hitable_list(list);
+        print("World Count " + list.Count);
 
         StartCoroutine(Render());
     }
@@ -37,13 +49,11 @@ public class MainLoop : MonoBehaviour {
         startTime = time();
         renderDone = false;
 
-        Hitable world = zScene.moving_obj();
         Vector3 lookFrom = new Vector3(1f, 2f, 2f);
         Vector3 lookAt = new Vector3(0f, 0f, -1f);
         float dist_to_focus = 2f;
         float aperture = 0f;
-        zCamera zcam = new zCamera(lookFrom, lookAt, Vector3.up, 90, (float)nx / (float)ny, aperture, dist_to_focus, 0f, 1f);
-        //zCamera zcam = new zCamera();
+        zCamera zcam = new zCamera(cam);
         uint index = 0;
         for (int j = ny - 1; j >= 0; j--)
         {
@@ -59,7 +69,7 @@ public class MainLoop : MonoBehaviour {
                 }
                 col /= (float)ns;
                 col = col.gamma;
-                rtResult.SetPixel(i, j, col);
+                rtResult.SetPixel(rtResult.width - i, j, col);
                 
             }
             progress += nx;
@@ -90,7 +100,7 @@ public class MainLoop : MonoBehaviour {
 
     private void OnPreRender()
     {
-        if (cb_output == null)
+        if (cb_output == null || !renderDone)
             return;
 
         cb_output.Clear();

@@ -13,37 +13,17 @@ public class zCamera {
     Vector3 u, v, w;
     bool useDoF;
 
-    public zCamera()
-    {
-        lower_left_corner = new Vector3(-2f, -1f, -1f);
-        horizontal = new Vector3(4f, 0f, 0f);
-        vertical = new Vector3(0f, 2f, 0f);
-        origin = Vector3.zero;
-        useDoF = false;
-    }
-
-    public zCamera(Vector3 lookFrom, Vector3 lookAt, Vector3 vup, float vfov, float aspect)
-    {
-        Vector3 u, v, w;
-        float theta = vfov * Mathf.Deg2Rad;
-        float half_height = Mathf.Tan(theta / 2f);
-        float half_width = aspect * half_height;
-
-        origin = lookFrom;
-        w = (lookFrom - lookAt).normalized;
-        u = Vector3.Cross(vup, w).normalized;
-        v = Vector3.Cross(w, u);
-
-        lower_left_corner = origin - half_width * u - half_height * v - w;
-        horizontal = 2f * half_width * u;
-        vertical = 2f * half_height * v;
-        useDoF = false;
-    }
-
-    public zCamera(Vector3 lookFrom, Vector3 lookAt, Vector3 vup, float vfov, float aspect, float aperture, float focus_dist, float t0, float t1)
+    public zCamera(Camera cam, float aperture, float focus_dist, float t0, float t1)
     {
         lens_radius = aperture / 2f;
-        
+
+        Vector3 lookFrom = cam.transform.position;
+        Vector3 lookAt = cam.transform.forward;
+        Vector3 vup = cam.transform.up;
+        float vfov = cam.fieldOfView;
+        float aspect = (float)Screen.width / (float)Screen.height;
+
+        Vector3 u, v, w;
         float theta = vfov * Mathf.Deg2Rad;
         float half_height = Mathf.Tan(theta / 2f);
         float half_width = aspect * half_height;
@@ -60,6 +40,30 @@ public class zCamera {
 
         time0 = t0;
         time1 = t1;
+    }
+
+    public zCamera(Camera cam)
+    {
+        Vector3 lookFrom = cam.transform.position;
+        Vector3 lookAt = cam.transform.forward;
+        Vector3 vup = cam.transform.up;
+        float vfov = cam.fieldOfView;
+        float aspect = (float)Screen.width / (float)Screen.height;
+
+        Vector3 u, v, w;
+        float theta = vfov * Mathf.Deg2Rad;
+        float half_height = Mathf.Tan(theta / 2f);
+        float half_width = aspect * half_height;
+
+        origin = lookFrom;
+        w = (lookFrom - lookAt).normalized;
+        u = Vector3.Cross(vup, w).normalized;
+        v = Vector3.Cross(w, u);
+
+        lower_left_corner = origin - half_width * u - half_height * v - w;
+        horizontal = 2f * half_width * u;
+        vertical = 2f * half_height * v;
+        useDoF = false;
     }
 
     public zRay get_ray(float s, float t)

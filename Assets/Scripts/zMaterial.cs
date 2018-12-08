@@ -2,35 +2,38 @@
 using System.Collections;
 using System;
 
-public abstract class zMaterial
+public abstract class zMaterial : ScriptableObject
 {
-    public Vector3 albedo;
+    public Color albedo;
     public abstract bool scatter(zRay r_in, hit_record rec, ref Vector3 attenuation, ref zRay scattered);
 }
 
+[CreateAssetMenu(fileName = "lambert", menuName = "RTMat/lambert")]
 public class lambertMaterial : zMaterial
 {
     public lambertMaterial(Vector3 a)
     {
-        albedo = a;
+        albedo = a.ToColor();
     }
 
     public override bool scatter(zRay r_in, hit_record rec, ref Vector3 attenuation, ref zRay scattered)
     {
         Vector3 target = rec.p + rec.normal + zRandom.random_in_unit_sphere();
         scattered = new zRay(rec.p, target - rec.p, r_in.time);
-        attenuation = albedo;
+        attenuation = albedo.ToVector3();
         return true;
     }
 }
 
+[CreateAssetMenu(fileName = "metal", menuName = "RTMat/metal")]
 public class metaMaterial : zMaterial
 {  
+    [Range(0f, 1f)]
     public float smoothness;
 
     public metaMaterial(Vector3 a, float smoothness = 1f)
     {
-        albedo = a;
+        albedo = a.ToColor();
         this.smoothness = smoothness;
     }
 
@@ -38,13 +41,14 @@ public class metaMaterial : zMaterial
     {
         Vector3 reflected = Vector3.Reflect(r_in.direction.normalized, rec.normal);
         scattered = new zRay(rec.p, reflected + (1f - smoothness) * zRandom.random_in_unit_sphere(), r_in.time);
-        attenuation = albedo;
+        attenuation = albedo.ToVector3();
         return (Vector3.Dot(scattered.direction, rec.normal) > 0);
     }
 }
-
+[CreateAssetMenu(fileName = "dielc", menuName = "RTMat/dielc")]
 public class dielectricMaterial : zMaterial
 {
+    [Range(1f, 2f)]
     public float ref_idx;
     public dielectricMaterial(float ri)
     {
