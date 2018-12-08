@@ -2,13 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.Globalization;
+using System;
 
 [RequireComponent(typeof(Camera))]
 public class MainLoop : MonoBehaviour {
-
+    public GUISkin skin;
     private Camera cam;
     private CommandBuffer cb_output;
     private Texture2D rtResult;
+    private float progress;
+    private int startTime;
+    private int timePassed;
+    private bool renderDone;
 	void Start () {
         cam = GetComponent<Camera>();
 
@@ -19,18 +25,24 @@ public class MainLoop : MonoBehaviour {
         rtResult = new Texture2D(Screen.width, Screen.height);
         rtResult.name = "ResultTexture";
 
+        StartCoroutine(Render());
+    }
+    
+    IEnumerator Render()
+    {
         int nx = Screen.width;
         int ny = Screen.height;
         int ns = 100;
-        
-        var s1 = new sphere(new Vector3(0f, 0f, -1f), 0.5f, new lambertMaterial(new Vector3(0.8f, 0.3f, 0.3f)));
-        var s2 = new sphere(new Vector3(0f, -100.5f, -1f), 100f, new lambertMaterial(new Vector3(0.8f, 0.8f, 0.0f)));
-        var s3 = new sphere(new Vector3(1f, 0f, -1f), 0.5f, new metaMaterial(new Vector3(0.8f, 0.6f, 0.2f), 0.3f));
-        var s4 = new sphere(new Vector3(-1f, 0f, -1f), 0.5f, new dielectricMaterial(1.5f));
-        var s5 = new sphere(new Vector3(-1f, 0f, -1f), -0.45f, new dielectricMaterial(1.5f));
-        List<Hitable> list = new List<Hitable>() { s1, s2, s3, s4, s5};
-        Hitable world = new hitable_list(list);
-        zCamera zcam = new zCamera(new Vector3(-2f, 2f, 1f), new Vector3(0f, 0f, -1f), new Vector3(0f, 1f, 0f), 90, (float)nx / (float)ny);
+        progress = 0f;
+        startTime = time();
+        renderDone = false;
+
+        Hitable world = zScene.moving_obj();
+        Vector3 lookFrom = new Vector3(1f, 2f, 2f);
+        Vector3 lookAt = new Vector3(0f, 0f, -1f);
+        float dist_to_focus = 2f;
+        float aperture = 0f;
+        zCamera zcam = new zCamera(lookFrom, lookAt, Vector3.up, 90, (float)nx / (float)ny, aperture, dist_to_focus, 0f, 1f);
         //zCamera zcam = new zCamera();
         uint index = 0;
         for (int j = ny - 1; j >= 0; j--)
@@ -48,11 +60,33 @@ public class MainLoop : MonoBehaviour {
                 col /= (float)ns;
                 col = col.gamma;
                 rtResult.SetPixel(i, j, col);
+                
             }
+            progress += nx;
+            yield return null;
         }
         rtResult.Apply();
+        renderDone = true;
+        timePassed = time();
+        yield return null;
     }
 
+    private void OnGUI()
+    {
+        GUI.skin = skin;
+        GUI.color = Color.green;
+        GUILayout.Label(((progress / (float)(Screen.width * Screen.height)) * 100).ToString("0.000") + "%");
+        if(!renderDone)
+            GUILayout.Label("time:" + (time() - startTime) + "s");
+        else
+            GUILayout.Label("time:" + (timePassed - startTime) + "s");
+    }
+
+    private int time()
+    {
+        int time = (int)(DateTime.Now - new DateTime(2018, 12, 1)).TotalSeconds;
+        return time;
+    }
 
     private void OnPreRender()
     {
@@ -70,7 +104,7 @@ public class MainLoop : MonoBehaviour {
         {
             zRay scattered = new zRay();
             Vector3 attenuation = Vector3.zero;
-            if (depth < 50 && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
+            if (depth < 30 && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
             {
                 return new Color(attenuation.x, attenuation.y, attenuation.z) * color(scattered, world, depth + 1);
             }

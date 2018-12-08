@@ -18,7 +18,7 @@ public class lambertMaterial : zMaterial
     public override bool scatter(zRay r_in, hit_record rec, ref Vector3 attenuation, ref zRay scattered)
     {
         Vector3 target = rec.p + rec.normal + zRandom.random_in_unit_sphere();
-        scattered = new zRay(rec.p, target - rec.p);
+        scattered = new zRay(rec.p, target - rec.p, r_in.time);
         attenuation = albedo;
         return true;
     }
@@ -37,7 +37,7 @@ public class metaMaterial : zMaterial
     public override bool scatter(zRay r_in, hit_record rec, ref Vector3 attenuation, ref zRay scattered)
     {
         Vector3 reflected = Vector3.Reflect(r_in.direction.normalized, rec.normal);
-        scattered = new zRay(rec.p, reflected + (1f - smoothness) * zRandom.random_in_unit_sphere());
+        scattered = new zRay(rec.p, reflected + (1f - smoothness) * zRandom.random_in_unit_sphere(), r_in.time);
         attenuation = albedo;
         return (Vector3.Dot(scattered.direction, rec.normal) > 0);
     }
@@ -80,17 +80,17 @@ public class dielectricMaterial : zMaterial
         }
         else
         {
-            scattered = new zRay(rec.p, reflected);
+            scattered = new zRay(rec.p, reflected, r_in.time);
             reflect_prob = 1f;
         }
 
         if(zRandom.drand() < reflect_prob)
         {
-            scattered = new zRay(rec.p, reflected);
+            scattered = new zRay(rec.p, reflected, r_in.time);
         }
         else
         {
-            scattered = new zRay(rec.p, refracted);
+            scattered = new zRay(rec.p, refracted, r_in.time);
         }
 
         return true;
