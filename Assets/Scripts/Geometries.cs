@@ -8,9 +8,16 @@ public class sphere : Hitable
 
     public sphere(Vector3 cen, float r, zMaterial mat)
     {
+        Debug.Log("new sphere");
         center = cen;
         radius = r;
         material = mat;
+    }
+
+    public override bool bounding_box(float t0, float t1, ref rtAABB box)
+    {
+        box = new rtAABB(center - Vector3.one * radius, center + Vector3.one * radius);
+        return true;
     }
 
     public override bool hit(zRay r, float t_min, float t_max, ref hit_record rec)
@@ -22,6 +29,7 @@ public class sphere : Hitable
         float discriminant = b * b - a * c;
         if (discriminant > 0)
         {
+            rec.mat = material;
             float temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
             if (temp < t_max && temp > t_min)
             {
@@ -70,6 +78,7 @@ public class moving_sphere : Hitable
         float discriminant = b * b - a * c;
         if(discriminant > 0)
         {
+            rec.mat = material;
             float temp = (-b - Mathf.Sqrt(discriminant)) / a;
             if(temp < t_max && temp > t_min)
             {
@@ -95,5 +104,16 @@ public class moving_sphere : Hitable
     public Vector3 center(float time)
     {
         return center0 + (time - time0) / (time1 - time0) * (center1 - center0);
+    }
+
+    
+
+    public override bool bounding_box(float t0, float t1, ref rtAABB box)
+    {
+        Vector3 radiuVec = Vector3.one * radius;
+        rtAABB box0 = new rtAABB(center0 - radiuVec, center0 + radiuVec);
+        rtAABB box1 = new rtAABB(center1 - radiuVec, center1 + radiuVec);
+        box = rtAABB.surrounding_box(box0, box1);
+        return true;
     }
 }

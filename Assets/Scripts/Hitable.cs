@@ -13,9 +13,11 @@ public struct hit_record
 
 
 
-public abstract class Hitable {
+public abstract class Hitable{
     public zMaterial material;
     public abstract bool hit(zRay r, float t_min, float t_max, ref hit_record rec);
+    public abstract bool bounding_box(float t0, float t1, ref rtAABB box);
+
 }
 
 
@@ -23,9 +25,36 @@ public abstract class Hitable {
 public class hitable_list : Hitable
 {
     public List<Hitable> list;
-    public hitable_list(List<Hitable> l)
+    public BVH_Node bvh;
+    public bool usBvh;
+    public hitable_list(List<Hitable> l, float t0 = 0f, float t1 = 0f, bool useBvh = true)
     {
         list = l;
+        bvh = new BVH_Node(l, t0, t1);
+        this.usBvh = useBvh;
+    }
+
+    public override bool bounding_box(float t0, float t1, ref rtAABB box)
+    {
+        if (list.Count < 1) return false;
+
+        rtAABB temp_box = new rtAABB();
+        bool first_true = list[0].bounding_box(t0, t1, ref temp_box);
+        if (!first_true)
+            return false;
+        else
+            box = temp_box;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[0].bounding_box(t0, t1, ref temp_box))
+            {
+                box = rtAABB.surrounding_box(box, temp_box);
+            }
+            else
+                return false;
+        }
+        return true;
     }
 
     public override bool hit(zRay r, float t_min, float t_max, ref hit_record rec)
@@ -33,15 +62,23 @@ public class hitable_list : Hitable
         hit_record temp_rec = new hit_record();
         bool hit_anything = false;
         float closest_so_far = t_max;
-        for (int i = 0; i < list.Count; i++)
+
+        if (!usBvh)
         {
-            if(list[i].hit(r, t_min, closest_so_far, ref temp_rec))
+            for (int i = 0; i < list.Count; i++)
             {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                rec = temp_rec;
-                rec.mat = list[i].material;
+                if (list[i].hit(r, t_min, closest_so_far, ref temp_rec))
+                {
+                    hit_anything = true;
+                    closest_so_far = temp_rec.t;
+                    rec = temp_rec;
+                    rec.mat = list[i].material;
+                }
             }
+        }
+        else
+        {
+            hit_anything = bvh.hit(r, t_min, t_max, ref rec);
         }
         return hit_anything;
     }

@@ -8,6 +8,8 @@ using System;
 [RequireComponent(typeof(Camera))]
 public class MainLoop : MonoBehaviour {
     public GUISkin skin;
+    public bool showGui;
+    public bool useBVH;
     private Camera cam;
     private CommandBuffer cb_output;
     private Texture2D rtResult;
@@ -34,7 +36,7 @@ public class MainLoop : MonoBehaviour {
         {
             list.Add(obj.toSphere());
         }
-        world = new hitable_list(list);
+        world = new hitable_list(list, 0, 0, useBVH);
         print("World Count " + list.Count);
 
         StartCoroutine(Render());
@@ -69,8 +71,7 @@ public class MainLoop : MonoBehaviour {
                 }
                 col /= (float)ns;
                 col = col.gamma;
-                rtResult.SetPixel(rtResult.width - i, j, col);
-                
+                rtResult.SetPixel(rtResult.width - i, j, col);              
             }
             progress += nx;
             yield return null;
@@ -83,6 +84,9 @@ public class MainLoop : MonoBehaviour {
 
     private void OnGUI()
     {
+        if (!showGui)
+            return;
+
         GUI.skin = skin;
         GUI.color = Color.green;
         GUILayout.Label(((progress / (float)(Screen.width * Screen.height)) * 100).ToString("0.000") + "%");

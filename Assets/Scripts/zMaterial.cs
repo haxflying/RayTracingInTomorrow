@@ -11,6 +11,8 @@ public abstract class zMaterial : ScriptableObject
 [CreateAssetMenu(fileName = "lambert", menuName = "RTMat/lambert")]
 public class lambertMaterial : zMaterial
 {
+    Texture2D mainTex;
+
     public lambertMaterial(Vector3 a)
     {
         albedo = a.ToColor();

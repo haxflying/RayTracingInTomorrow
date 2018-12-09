@@ -9,6 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: lambert 1
-  m_EditorClassIdentifier: Assembly-CSharp::lambertMaterial
-  albedo: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 0}
+  m_Name: gray_metal
+  m_EditorClassIdentifier: Assembly-CSharp::metaMaterial
+  albedo: {r: 0.6698113, g: 0.6698113, b: 0.6698113, a: 0}
+  smoothness: 0.8

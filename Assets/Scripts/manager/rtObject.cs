@@ -24,6 +24,9 @@ public class rtObject : MonoBehaviour {
     {
         if(preview)
         {
+            if (gameObject.name != material.name)
+                gameObject.name = material.name;
+
             if (mat == null)
             {
                 mat = new Material(Shader.Find("Custom/Mark"));
