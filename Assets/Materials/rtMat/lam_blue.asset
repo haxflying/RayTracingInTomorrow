@@ -8,7 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: blue_lamb
-  m_EditorClassIdentifier: Assembly-CSharp::lambertMaterial
-  albedo: {r: 0, g: 0.4178329, b: 0.8396226, a: 0}
+  m_Script: {fileID: 11500000, guid: 80a67c027e07d154ca8b9ba3d012cdce, type: 3}
+  m_Name: lam_blue
+  m_EditorClassIdentifier: 
+  albedo: {r: 0, g: 0.5366924, b: 0.9433962, a: 0}

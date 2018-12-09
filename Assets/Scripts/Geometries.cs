@@ -8,7 +8,6 @@ public class sphere : Hitable
 
     public sphere(Vector3 cen, float r, zMaterial mat)
     {
-        Debug.Log("new sphere");
         center = cen;
         radius = r;
         material = mat;
@@ -36,6 +35,8 @@ public class sphere : Hitable
                 rec.t = temp;
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
+                if (DebugDrawer.Instance != null && DebugDrawer.Instance.isDebug)
+                    DebugDrawer.Instance.points.Add(rec.p);
                 return true;
             }
             temp = (-b + Mathf.Sqrt(b * b - a * c)) / a;
@@ -44,6 +45,8 @@ public class sphere : Hitable
                 rec.t = temp;
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
+                if (DebugDrawer.Instance != null && DebugDrawer.Instance.isDebug)
+                    DebugDrawer.Instance.points.Add(rec.p);
                 return true;
             }
         }

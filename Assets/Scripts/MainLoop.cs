@@ -6,10 +6,12 @@ using System.Globalization;
 using System;
 
 [RequireComponent(typeof(Camera))]
-public class MainLoop : MonoBehaviour {
+public partial class MainLoop : MonoBehaviour {
     public GUISkin skin;
     public bool showGui;
     public bool useBVH;
+    public bool debugMod;
+
     private Camera cam;
     private CommandBuffer cb_output;
     private Texture2D rtResult;
@@ -17,6 +19,7 @@ public class MainLoop : MonoBehaviour {
     private int startTime;
     private int timePassed;
     private bool renderDone;
+    private  Vector2 debugPoint;
 
     private Hitable world;
 
@@ -39,7 +42,7 @@ public class MainLoop : MonoBehaviour {
         world = new hitable_list(list, 0, 0, useBVH);
         print("World Count " + list.Count);
 
-        StartCoroutine(Render());
+        debugPoint = Vector2.zero;
     }
     
     IEnumerator Render()
@@ -57,58 +60,44 @@ public class MainLoop : MonoBehaviour {
         float aperture = 0f;
         zCamera zcam = new zCamera(cam);
         uint index = 0;
-        for (int j = ny - 1; j >= 0; j--)
+
+        if (debugMod)
         {
             Color col = Color.black;
-            for (int i = 0; i < nx; i++)
+            for (int s = 0; s < 10; s++)
             {
-                for (int s = 0; s < ns; s++)
-                {
-                    float u = (float)(i + zRandom.Halton5(index++)) / (float)(nx);
-                    float v = (float)(j + zRandom.Halton5(index++)) / (float)(ny);
-                    zRay r = zcam.get_ray(u, v);
-                    col += color(r, world, 0);
-                }
-                col /= (float)ns;
-                col = col.gamma;
-                rtResult.SetPixel(rtResult.width - i, j, col);              
+                float u = (float)((int)debugPoint.x + zRandom.Halton5(index++)) / (float)(nx);
+                float v = (float)((int)debugPoint.y + zRandom.Halton5(index++)) / (float)(ny);
+                zRay r = zcam.get_ray(u, v);
+                col += color(r, world, 0);
             }
-            progress += nx;
-            yield return null;
         }
-        rtResult.Apply();
-        renderDone = true;
-        timePassed = time();
-        yield return null;
-    }
-
-    private void OnGUI()
-    {
-        if (!showGui)
-            return;
-
-        GUI.skin = skin;
-        GUI.color = Color.green;
-        GUILayout.Label(((progress / (float)(Screen.width * Screen.height)) * 100).ToString("0.000") + "%");
-        if(!renderDone)
-            GUILayout.Label("time:" + (time() - startTime) + "s");
         else
-            GUILayout.Label("time:" + (timePassed - startTime) + "s");
-    }
-
-    private int time()
-    {
-        int time = (int)(DateTime.Now - new DateTime(2018, 12, 1)).TotalSeconds;
-        return time;
-    }
-
-    private void OnPreRender()
-    {
-        if (cb_output == null || !renderDone)
-            return;
-
-        cb_output.Clear();
-        cb_output.Blit(rtResult, BuiltinRenderTextureType.CameraTarget);
+        {
+            for (int j = ny - 1; j >= 0; j--)
+            {
+                Color col = Color.black;
+                for (int i = 0; i < nx; i++)
+                {
+                    for (int s = 0; s < ns; s++)
+                    {
+                        float u = (float)(i + zRandom.Halton5(index++)) / (float)(nx);
+                        float v = (float)(j + zRandom.Halton5(index++)) / (float)(ny);
+                        zRay r = zcam.get_ray(u, v);
+                        col += color(r, world, 0);
+                    }
+                    col /= (float)ns;
+                    col = col.gamma;
+                    rtResult.SetPixel(rtResult.width - i, j, col);
+                }
+                progress += nx;
+                yield return null;
+            }
+            rtResult.Apply();
+            renderDone = true;
+            timePassed = time();
+        }
+        yield return null;
     }    
 
     Color color(zRay r, Hitable world, int depth)
@@ -130,6 +119,16 @@ public class MainLoop : MonoBehaviour {
             float t = 0.5f * (r.direction.normalized.y + 1f);
             return (1f - t) * Color.white + t * new Color(0.5f, 0.7f, 1.0f);
         }
+    }
+
+
+    private void OnPreRender()
+    {
+        if (cb_output == null || !renderDone)
+            return;
+
+        cb_output.Clear();
+        cb_output.Blit(rtResult, BuiltinRenderTextureType.CameraTarget);
     }
 
 }
