@@ -14,6 +14,7 @@ public partial class MainLoop : MonoBehaviour {
 
     [Range(1, 200)]
     public int ns = 50;
+    public Color env_Color = Color.black;
 
     private Camera cam;
     private CommandBuffer cb_output;
@@ -42,6 +43,7 @@ public partial class MainLoop : MonoBehaviour {
         {
             list.Add(obj.toSphere());
         }
+
         world = new hitable_list(list, 0, 0, useBVH);
         print("World Count " + list.Count);
 
@@ -111,17 +113,19 @@ public partial class MainLoop : MonoBehaviour {
         {
             zRay scattered = new zRay();
             Vector3 attenuation = Vector3.zero;
+            Color emitted = rec.mat.emitted();
             if (depth < 30 && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
             {                
-                return new Color(attenuation.x, attenuation.y, attenuation.z) * color(scattered, world, depth + 1);
+                return emitted + new Color(attenuation.x, attenuation.y, attenuation.z) * color(scattered, world, depth + 1);
             }
             else
-                return Color.black;
+                return emitted;
         }
         else
         {
-            float t = 0.5f * (r.direction.normalized.y + 1f);
-            return (1f - t) * Color.white + t * new Color(0.5f, 0.7f, 1.0f);
+            //float t = 0.5f * (r.direction.normalized.y + 1f);
+            //return (1f - t) * Color.white + t * new Color(0.5f, 0.7f, 1.0f);
+            return env_Color;
         }
     }
 

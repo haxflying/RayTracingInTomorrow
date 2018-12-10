@@ -26,31 +26,40 @@ public class rtObject : MonoBehaviour {
     {
         if(preview)
         {
-            if (gameObject.name != material.name)
-                gameObject.name = material.name;
+            DoPreview();
+        }
+    }
 
-            if (mat == null)
-            {
-                mat = new Material(Shader.Find("Custom/Mark"));
-                GetComponent<Renderer>().material = mat;
-            }
+    public void DoPreview()
+    {
+        if (gameObject.name != material.name)
+            gameObject.name = material.name;
 
-            if (material is lambertMaterial)
-            {
-                mat.SetColor("_Color", material.albedo);
-                mat.SetFloat("_Metallic", 0f);
-                mat.SetFloat("_Glossiness", 0f);
-            }
-            else if(material is metaMaterial)
-            {
-                mat.SetColor("_Color", material.albedo);
-                mat.SetFloat("_Metallic", 1f);
-                mat.SetFloat("_Glossiness", (material as metaMaterial).smoothness);
-            }
-            else if(material is dielectricMaterial)
-            {
+        if (mat == null)
+        {
+            mat = new Material(Shader.Find("Custom/Mark"));
+            GetComponent<Renderer>().material = mat;
+        }
 
-            }
+        if (material is lambertMaterial)
+        {
+            mat.SetColor("_Color", material.albedo);
+            mat.SetFloat("_Metallic", 0f);
+            mat.SetFloat("_Glossiness", 0f);
+        }
+        else if (material is metaMaterial)
+        {
+            mat.SetColor("_Color", material.albedo);
+            mat.SetFloat("_Metallic", 1f);
+            mat.SetFloat("_Glossiness", (material as metaMaterial).smoothness);
+        }
+        else if (material is dielectricMaterial)
+        {
+
+        }
+        else if(material is diffuseLight)
+        {
+
         }
     }
 }

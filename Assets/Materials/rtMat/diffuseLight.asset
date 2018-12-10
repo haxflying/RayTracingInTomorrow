@@ -8,8 +8,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdf2be7a6d09bb440b57c097d5f0162a, type: 3}
-  m_Name: metal_plane
+  m_Script: {fileID: 11500000, guid: af19e648be043bc418df45db7f2fafce, type: 3}
+  m_Name: diffuseLight
   m_EditorClassIdentifier: 
-  albedo: {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 0}
-  smoothness: 0.634
+  albedo: {r: 0, g: 0, b: 0, a: 0}
+  emitTex: {fileID: 0}
+  color: {r: 4, g: 2.8880193, b: 2.1698112, a: 0}

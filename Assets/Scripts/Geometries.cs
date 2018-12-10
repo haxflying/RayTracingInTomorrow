@@ -87,6 +87,8 @@ public class moving_sphere : Hitable
 
     public override bool hit(zRay r, float t_min, float t_max, ref hit_record rec)
     {
+        if (rec.lastHit == id)
+            return false;
         Vector3 oc = r.origin - center(r.time);
         float a = Vector3.Dot(r.direction, r.direction);
         float b = Vector3.Dot(oc, r.direction);
@@ -102,6 +104,7 @@ public class moving_sphere : Hitable
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center(r.time)) / radius;
                 rec.mat = material;
+                rec.lastHit = id;
                 return true;
             }
             temp = (-b + Mathf.Sqrt(discriminant)) / a;
@@ -111,6 +114,7 @@ public class moving_sphere : Hitable
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center(r.time)) / radius;
                 rec.mat = material;
+                rec.lastHit = id;
                 return true;
             }
         }

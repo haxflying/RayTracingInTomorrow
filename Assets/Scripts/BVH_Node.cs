@@ -13,6 +13,7 @@ public class BVH_Node : Hitable
     public BVH_Node(List<Hitable> list, float time0, float time1)
     {
         Objlist = list;
+        Debug.Log("new bvh node " + list.Count);
         int axis = Mathf.FloorToInt(zRandom.drand() * 3f);
 
         if (axis == 0)
@@ -67,8 +68,9 @@ public class BVH_Node : Hitable
         }
         else
         {
+            Debug.Log("lr " + n / 2);
             left = new BVH_Node(list.GetRange(0, n / 2), time0, time1);
-            right = new BVH_Node(list.GetRange(n / 2, n / 2), time0, time1);
+            right = new BVH_Node(list.GetRange(n / 2, n -  n / 2), time0, time1);
         }
         rtAABB box_l = new rtAABB(), box_r = new rtAABB();
         if(!left.bounding_box(time0, time1, ref box_l) || !right.bounding_box(time0, time1, ref box_r))
@@ -88,13 +90,6 @@ public class BVH_Node : Hitable
     {
         if (box.hit(r, t_min, t_max))
         {
-            if (Objlist.Count < 1)
-                return false;
-            else if(Objlist.Count == 1)
-            {
-                return Objlist[0].hit(r, t_min, t_max, ref rec);
-            }
-
             hit_record left_rec = new hit_record(), right_rec = new hit_record();
             bool hit_left = left.hit(r, t_min, t_max, ref left_rec);
             bool hit_right = right.hit(r, t_min, t_max, ref right_rec);
