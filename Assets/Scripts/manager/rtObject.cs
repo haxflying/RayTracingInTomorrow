@@ -15,9 +15,11 @@ public class rtObject : MonoBehaviour {
 
     public sphere toSphere()
     {
+        int instanceID = gameObject.GetInstanceID();
         float radius = isPlane ? 1000f : transform.localScale.x / 2f;
         Vector3 center = isPlane ? -1000f * Vector3.up : transform.position;
-        return new sphere(center, radius, material);
+        print(instanceID + " tosphere");
+        return new sphere(center, radius, material, instanceID);
     }
 
     private void Update()

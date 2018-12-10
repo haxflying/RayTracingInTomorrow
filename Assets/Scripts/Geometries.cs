@@ -6,11 +6,12 @@ public class sphere : Hitable
     public Vector3 center;
     public float radius;
 
-    public sphere(Vector3 cen, float r, zMaterial mat)
+    public sphere(Vector3 cen, float r, zMaterial mat, int instanceID = -1)
     {
         center = cen;
         radius = r;
         material = mat;
+        id = instanceID;
     }
 
     public override bool bounding_box(float t0, float t1, ref rtAABB box)
@@ -21,6 +22,8 @@ public class sphere : Hitable
 
     public override bool hit(zRay r, float t_min, float t_max, ref hit_record rec)
     {
+        if (rec.lastHit == id)
+            return false;
         Vector3 oc = r.origin - center;
         float a = Vector3.Dot(r.direction, r.direction);
         float b = Vector3.Dot(oc, r.direction);
@@ -28,13 +31,14 @@ public class sphere : Hitable
         float discriminant = b * b - a * c;
         if (discriminant > 0)
         {
-            rec.mat = material;
+            rec.mat = material;          
             float temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
             if (temp < t_max && temp > t_min)
             {
                 rec.t = temp;
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
+                rec.lastHit = id;
 
                 if (DebugDrawer.isDebug)
                 {
@@ -49,6 +53,7 @@ public class sphere : Hitable
                 rec.t = temp;
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
+                rec.lastHit = id;
 
                 if (DebugDrawer.isDebug)
                 {

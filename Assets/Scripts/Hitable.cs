@@ -9,11 +9,13 @@ public struct hit_record
     public Vector3 p;
     public Vector3 normal;
     public zMaterial mat;
+    public int lastHit;
 }
 
 
 
 public abstract class Hitable{
+    public int id;
     public zMaterial material;
     public abstract bool hit(zRay r, float t_min, float t_max, ref hit_record rec);
     public abstract bool bounding_box(float t0, float t1, ref rtAABB box);

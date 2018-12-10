@@ -23,7 +23,6 @@ public class zCamera {
         float vfov = cam.fieldOfView;
         float aspect = (float)Screen.width / (float)Screen.height;
 
-        Vector3 u, v, w;
         float theta = vfov * Mathf.Deg2Rad;
         float half_height = Mathf.Tan(theta / 2f);
         float half_width = aspect * half_height;
@@ -45,18 +44,17 @@ public class zCamera {
     public zCamera(Camera cam)
     {
         Vector3 lookFrom = cam.transform.position;
-        Vector3 lookAt = cam.transform.forward;
+        Vector3 lookAt = -cam.transform.forward;
         Vector3 vup = cam.transform.up;
         float vfov = cam.fieldOfView;
         float aspect = (float)Screen.width / (float)Screen.height;
 
-        Vector3 u, v, w;
         float theta = vfov * Mathf.Deg2Rad;
         float half_height = Mathf.Tan(theta / 2f);
         float half_width = aspect * half_height;
 
         origin = lookFrom;
-        w = (lookFrom - lookAt).normalized;
+        w = lookAt.normalized;
         u = Vector3.Cross(vup, w).normalized;
         v = Vector3.Cross(w, u);
 
@@ -64,6 +62,9 @@ public class zCamera {
         horizontal = 2f * half_width * u;
         vertical = 2f * half_height * v;
         useDoF = false;
+
+        time0 = time1 = 0f;
+        lens_radius = 0f;
     }
 
     public zRay get_ray(float s, float t)

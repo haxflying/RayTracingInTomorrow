@@ -12,6 +12,9 @@ public partial class MainLoop : MonoBehaviour {
     public bool useBVH;
     public bool debugMod;
 
+    [Range(1, 200)]
+    public int ns = 50;
+
     private Camera cam;
     private CommandBuffer cb_output;
     private Texture2D rtResult;
@@ -49,7 +52,6 @@ public partial class MainLoop : MonoBehaviour {
     {
         int nx = Screen.width;
         int ny = Screen.height;
-        int ns = 100;
         progress = 0f;
         startTime = time();
         renderDone = false;
@@ -64,7 +66,7 @@ public partial class MainLoop : MonoBehaviour {
         if (debugMod)
         {
             Color col = Color.black;
-            for (int s = 0; s < 10; s++)
+            for (int s = 0; s < 1; s++)
             {
                 float u = (float)((int)debugPoint.x + zRandom.Halton5(index++)) / (float)(nx);
                 float v = (float)((int)debugPoint.y + zRandom.Halton5(index++)) / (float)(ny);
@@ -103,13 +105,14 @@ public partial class MainLoop : MonoBehaviour {
 
     Color color(zRay r, Hitable world, int depth)
     {
+        
         hit_record rec = new hit_record();
         if(world.hit(r, 0.0f, float.MaxValue, ref rec))
         {
             zRay scattered = new zRay();
             Vector3 attenuation = Vector3.zero;
             if (depth < 30 && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
-            {
+            {                
                 return new Color(attenuation.x, attenuation.y, attenuation.z) * color(scattered, world, depth + 1);
             }
             else
