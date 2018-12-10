@@ -9,32 +9,20 @@ public partial class MainLoop : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(0) && debugMod)
         {
-            DebugDrawer.Instance.points.Clear();
+            DebugDrawer.Clear();
             debugPoint = Input.mousePosition;
             StartCoroutine(Render());
         }
 
-        if(Input.GetKeyDown(KeyCode.S))
+        if(Input.GetKeyDown(KeyCode.S) && !debugMod)
         {
             StartCoroutine(Render());
         }
 
-
-        if(debugMod && DebugDrawer.Instance == null)
-        {
-            gameObject.AddComponent<DebugDrawer>();
-            DebugDrawer.Instance.isDebug = true;
-        }
-
-        if (DebugDrawer.Instance == null)
-            return;
-
-        if(!debugMod && DebugDrawer.Instance.isDebug)
-        {
-            DebugDrawer.Instance.isDebug = false;
-        }
+        if (DebugDrawer.isDebug != debugMod)
+            DebugDrawer.isDebug = debugMod;
     }
 
 

@@ -69,6 +69,7 @@ public partial class MainLoop : MonoBehaviour {
                 float u = (float)((int)debugPoint.x + zRandom.Halton5(index++)) / (float)(nx);
                 float v = (float)((int)debugPoint.y + zRandom.Halton5(index++)) / (float)(ny);
                 zRay r = zcam.get_ray(u, v);
+                DebugDrawer.Init(cam);
                 col += color(r, world, 0);
             }
         }

@@ -35,8 +35,12 @@ public class sphere : Hitable
                 rec.t = temp;
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
-                if (DebugDrawer.Instance != null && DebugDrawer.Instance.isDebug)
-                    DebugDrawer.Instance.points.Add(rec.p);
+
+                if (DebugDrawer.isDebug)
+                {
+                    DebugDrawer.points.Add(rec.p);
+                    DebugDrawer.normals.Add(rec.normal);
+                }
                 return true;
             }
             temp = (-b + Mathf.Sqrt(b * b - a * c)) / a;
@@ -45,8 +49,12 @@ public class sphere : Hitable
                 rec.t = temp;
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
-                if (DebugDrawer.Instance != null && DebugDrawer.Instance.isDebug)
-                    DebugDrawer.Instance.points.Add(rec.p);
+
+                if (DebugDrawer.isDebug)
+                {
+                    DebugDrawer.points.Add(rec.p);
+                    DebugDrawer.normals.Add(rec.normal);
+                }
                 return true;
             }
         }
