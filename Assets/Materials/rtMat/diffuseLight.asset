@@ -13,4 +13,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   albedo: {r: 0, g: 0, b: 0, a: 0}
   emitTex: {fileID: 0}
-  color: {r: 4, g: 2.8880193, b: 2.1698112, a: 0}
+  color: {r: 7.999999, g: 5.780104, b: 4.3560205, a: 0}

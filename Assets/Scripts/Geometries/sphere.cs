@@ -14,6 +14,11 @@ public class sphere : Hitable
         id = instanceID;
     }
 
+    public override Vector3 origin()
+    {
+        return center;
+    }
+
     public override bool bounding_box(float t0, float t1, ref rtAABB box)
     {
         box = new rtAABB(center - Vector3.one * radius, center + Vector3.one * radius);

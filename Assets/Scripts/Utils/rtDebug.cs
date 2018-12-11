@@ -13,6 +13,7 @@ public partial class MainLoop : MonoBehaviour
         {
             DebugDrawer.Clear();
             debugPoint = Input.mousePosition;
+            debugPoint.x = Screen.width - debugPoint.x;
             StartCoroutine(Render());
         }
 

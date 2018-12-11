@@ -19,7 +19,7 @@ public abstract class Hitable{
     public zMaterial material;
     public abstract bool hit(zRay r, float t_min, float t_max, ref hit_record rec);
     public abstract bool bounding_box(float t0, float t1, ref rtAABB box);
-
+    public virtual Vector3 origin() { return Vector3.one * 1000f; }
 }
 
 

@@ -13,7 +13,6 @@ public class BVH_Node : Hitable
     public BVH_Node(List<Hitable> list, float time0, float time1)
     {
         Objlist = list;
-        Debug.Log("new bvh node " + list.Count);
         int axis = Mathf.FloorToInt(zRandom.drand() * 3f);
 
         if (axis == 0)
@@ -68,7 +67,6 @@ public class BVH_Node : Hitable
         }
         else
         {
-            Debug.Log("lr " + n / 2);
             left = new BVH_Node(list.GetRange(0, n / 2), time0, time1);
             right = new BVH_Node(list.GetRange(n / 2, n -  n / 2), time0, time1);
         }

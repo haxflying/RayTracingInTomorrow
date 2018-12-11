@@ -5,6 +5,7 @@ using UnityEditor;
 public class DebugDrawer : MonoBehaviour
 {
     public static bool isDebug;
+    static public rtObject[] objs;
     static public List<Vector3> points = new List<Vector3>();
     static public List<Vector3> normals = new List<Vector3>();
 
@@ -39,6 +40,17 @@ public class DebugDrawer : MonoBehaviour
 
     static void DrawRay()
     {
+        Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
+        Handles.color = Color.green;
+        if (objs != null)
+        {
+            foreach(var obj in objs)
+            {
+                Handles.Label(obj.transform.position, obj.instanceID.ToString());
+                Bounds bd = obj.GetComponent<Renderer>().bounds;
+                Handles.DrawWireCube(bd.center, bd.size);
+            }
+        }
         Handles.color = Color.red;
         for (int i = 0; i < points.Count - 1; i++)
         {
@@ -60,5 +72,6 @@ public class DebugDrawer : MonoBehaviour
         {
             Handles.Label(points[i], i.ToString(), style);
         }
+
     }
 }

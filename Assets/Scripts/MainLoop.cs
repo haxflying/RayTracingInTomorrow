@@ -38,12 +38,9 @@ public partial class MainLoop : MonoBehaviour {
         rtResult.name = "ResultTexture";
 
         rtObject[] objs = GameObject.FindObjectsOfType<rtObject>();
-        List<Hitable> list = new List<Hitable>();
-        foreach(var obj in objs)
-        {
-            list.Add(obj.toSphere());
-        }
-
+        DebugDrawer.objs = objs;
+        List<Hitable> list = rtCull.cull(cam, objs);
+       
         world = new hitable_list(list, 0, 0, useBVH);
         print("World Count " + list.Count);
 
@@ -115,11 +112,13 @@ public partial class MainLoop : MonoBehaviour {
             Vector3 attenuation = Vector3.zero;
             Color emitted = rec.mat.emitted();
             if (depth < 30 && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
-            {                
+            {
                 return emitted + new Color(attenuation.x, attenuation.y, attenuation.z) * color(scattered, world, depth + 1);
             }
             else
+            {
                 return emitted;
+            }
         }
         else
         {
@@ -129,6 +128,7 @@ public partial class MainLoop : MonoBehaviour {
         }
     }
 
+  
 
     private void OnPreRender()
     {
