@@ -7,7 +7,7 @@ public class rtObject : MonoBehaviour {
 
     public enum ObjType
     {
-        Sphere, TriangleMesh
+        Sphere, TriangleMesh, Quad
     }
 
     public ObjType type;
@@ -28,7 +28,7 @@ public class rtObject : MonoBehaviour {
             Vector3 center = isPlane ? -1000f * Vector3.up : transform.position;
             return new sphere(center, radius, material, instanceID);
         }
-        else
+        else if(type == ObjType.TriangleMesh)
         { 
             Bounds bd = GetComponent<Renderer>().bounds;
             Vector3[] vertices = GetComponent<MeshFilter>().sharedMesh.vertices;
@@ -46,7 +46,10 @@ public class rtObject : MonoBehaviour {
             }
             return new triangle_list(list, bd, instanceID);
         }
-        
+        else
+        {
+            return new quad(material, transform, instanceID);
+        }
     }
 
     public void DoPreview()
@@ -78,14 +81,13 @@ public class rtObject : MonoBehaviour {
         }
         else if(material is diffuseLight)
         {
-
+            mat.SetColor("_Emission", (material as diffuseLight).color);
         }
     }
 
     public void test()
     {
-        Vector3[] vertices = GetComponent<MeshFilter>().sharedMesh.vertices;
-        foreach(var v in vertices)
+        foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
         {
             print(v);
         }

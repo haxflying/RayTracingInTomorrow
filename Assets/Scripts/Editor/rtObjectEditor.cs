@@ -7,12 +7,20 @@ using UnityEditor;
 [CanEditMultipleObjects]
 public class rtObjectEditor : Editor {
 
+    SerializedProperty mat, type;
+
+    private void OnEnable()
+    {
+        mat = serializedObject.FindProperty("material");
+        type = serializedObject.FindProperty("type");
+    }
+
     public override void OnInspectorGUI()
     {
         rtObject me = target as rtObject;
         GUILayout.Space(20);
-        me.material = (zMaterial)EditorGUILayout.ObjectField("mat", me.material, typeof(zMaterial), false);
-        me.type = (rtObject.ObjType)EditorGUILayout.EnumPopup("Type", me.type);
+        EditorGUILayout.PropertyField(mat, new GUIContent("mat"));
+        EditorGUILayout.PropertyField(type, new GUIContent("type"));
         if(me.type == rtObject.ObjType.Sphere)
         {
             me.isPlane = GUILayout.Toggle(me.isPlane, "isPlane");
@@ -28,9 +36,11 @@ public class rtObjectEditor : Editor {
             me.DoPreview();
         }
 
-        if(GUILayout.Button("Test"))
-        {
-            me.test();
-        }
+        //if(GUILayout.Button("Test"))
+        //{
+        //    me.test();
+        //}
+
+        serializedObject.ApplyModifiedProperties();
     }
 }

@@ -4,6 +4,7 @@
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
+		[HDR]_Emission("Emission", Color) = (0,0,0,0)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -24,6 +25,7 @@
 
 		half _Glossiness;
 		half _Metallic;
+		half4 _Emission;
 		fixed4 _Color;
 
 		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
@@ -40,6 +42,7 @@
 			// Metallic and smoothness come from slider variables
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
+			o.Emission = _Emission.rgb;
 			o.Alpha = c.a;
 		}
 		ENDCG

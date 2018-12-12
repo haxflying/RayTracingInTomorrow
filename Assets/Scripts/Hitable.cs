@@ -10,6 +10,7 @@ public struct hit_record
     public Vector3 normal;
     public zMaterial mat;
     public int lastHit;
+    public Vector2 uv;
 }
 
 
