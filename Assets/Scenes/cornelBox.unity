@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -978,8 +978,9 @@ GameObject:
   - component: {fileID: 699988841}
   - component: {fileID: 699988840}
   - component: {fileID: 699988839}
+  - component: {fileID: 699988842}
   m_Layer: 0
-  m_Name: Light
+  m_Name: diffuseLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1027,7 +1028,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 1252716710}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1054,6 +1055,22 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 699988837}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &699988842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 699988837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee9732a1ba432ef4dbbd60c791ad7a43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 2
+  material: {fileID: 11400000, guid: 8a71bc8fae9d2bd49ae139e1a8f8251b, type: 2}
+  isPlane: 0
+  isMoving: 0
+  instanceID: 0
 --- !u!1 &716899223
 GameObject:
   m_ObjectHideFlags: 0
@@ -1419,6 +1436,34 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 0}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
+--- !u!21 &1252716710
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Custom/Mark
+  m_Shader: {fileID: 4800000, guid: 78ff27752bdc4f441a6027df9c729239, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Glossiness: 0.5
+    - _Metallic: 0
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Emission: {r: 7.999999, g: 5.780104, b: 4.3560205, a: 0}
 --- !u!1 &1316038637
 GameObject:
   m_ObjectHideFlags: 0
@@ -2349,6 +2394,31 @@ Prefab:
     - target: {fileID: 4356841679511666, guid: 63ab4f392205fca47a7826256c9cb0f7, type: 2}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114099015939247928, guid: 63ab4f392205fca47a7826256c9cb0f7,
+        type: 2}
+      propertyPath: useBVH
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114099015939247928, guid: 63ab4f392205fca47a7826256c9cb0f7,
+        type: 2}
+      propertyPath: showGui
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114099015939247928, guid: 63ab4f392205fca47a7826256c9cb0f7,
+        type: 2}
+      propertyPath: debugMod
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114099015939247928, guid: 63ab4f392205fca47a7826256c9cb0f7,
+        type: 2}
+      propertyPath: ns
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 114099015939247928, guid: 63ab4f392205fca47a7826256c9cb0f7,
+        type: 2}
+      propertyPath: maxDepth
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 63ab4f392205fca47a7826256c9cb0f7, type: 2}

@@ -38,8 +38,10 @@ public class quad : Hitable
 
     public override bool hit(zRay r, float t_min, float t_max, ref hit_record rec)
     {
-        r = new zRay(trans.worldToLocalMatrix.MultiplyPoint(r.origin), trans.worldToLocalMatrix.MultiplyPoint(r.direction));
-        float t = (k - r.origin.y) / r.direction.y;
+        if (Vector3.Dot(r.direction, normal) > 0)
+            return false;
+        r = new zRay(trans.worldToLocalMatrix.MultiplyPoint(r.origin), trans.worldToLocalMatrix.MultiplyVector(r.direction));
+        float t = (k - r.origin.z) / r.direction.z;
         if (t < t_min || t > t_max)
             return false;
         float x = r.origin.x + t * r.direction.x;
@@ -56,7 +58,9 @@ public class quad : Hitable
         {
             DebugDrawer.points.Add(rec.p);
             DebugDrawer.normals.Add(rec.normal);
-            Debug.Log("rec.p " + rec.p);
+            //Debug.Log(r.origin + " " + r.direction);
+            //Debug.Log("rec.p " + rec.p + " local " + r.point_at_parameter(t));
+            //Debug.Log("id " + id);
         }
         return true;
     }

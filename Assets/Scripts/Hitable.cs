@@ -68,14 +68,20 @@ public class hitable_list : Hitable
 
         if (!usBvh)
         {
+            float minDis = float.MaxValue;
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i].hit(r, t_min, closest_so_far, ref temp_rec))
                 {
-                    hit_anything = true;
-                    closest_so_far = temp_rec.t;
-                    rec = temp_rec;
-                    rec.mat = list[i].material;
+                    float dis = (temp_rec.p - r.origin).magnitude;
+                    if (dis < minDis)
+                    {
+                        hit_anything = true;
+                        closest_so_far = temp_rec.t;
+                        rec = temp_rec;
+                        rec.mat = list[i].material;
+                        minDis = dis;
+                    }
                 }
             }
         }

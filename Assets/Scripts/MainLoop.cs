@@ -14,6 +14,8 @@ public partial class MainLoop : MonoBehaviour {
 
     [Range(1, 200)]
     public int ns = 50;
+    [Range(2, 50)]
+    public int maxDepth;
     public Color env_Color = Color.black;
 
     private Camera cam;
@@ -111,7 +113,7 @@ public partial class MainLoop : MonoBehaviour {
             zRay scattered = new zRay();
             Vector3 attenuation = Vector3.zero;
             Color emitted = rec.mat.emitted();
-            if (depth < 30 && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
+            if (depth < maxDepth && rec.mat.scatter(r, rec, ref attenuation, ref scattered))
             {
                 return emitted + new Color(attenuation.x, attenuation.y, attenuation.z) * color(scattered, world, depth + 1);
             }
