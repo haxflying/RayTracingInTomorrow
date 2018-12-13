@@ -14,7 +14,7 @@ public partial class MainLoop : MonoBehaviour {
 
     [Range(1, 200)]
     public int ns = 50;
-    [Range(2, 50)]
+    [Range(1, 50)]
     public int maxDepth;
     public Color env_Color = Color.black;
 

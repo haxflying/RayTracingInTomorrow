@@ -19,6 +19,7 @@ public class JobLoop : MonoBehaviour
     private NativeArray<jHitRes> hits;
     private rtJob myJob;
     private JobHandle handle;
+    private bool bResPrinted;
 
     private void Start()
     {
@@ -38,6 +39,7 @@ public class JobLoop : MonoBehaviour
             jobSpheres[i] = objs[i].toJobSphere();
         }
 
+        bResPrinted = false;
         InitRender();
         Render();
     }
@@ -65,21 +67,28 @@ public class JobLoop : MonoBehaviour
         }
 
         hits = new NativeArray<jHitRes>(nx * ny, Allocator.Persistent);
+
         myJob = new rtJob();
         myJob.batchHitCount = hits.Length / batchCount;
         myJob.ns = ns;
+        myJob.t_min = 0f;
+        myJob.t_max = 300f;
+        myJob.rays = rays;
+        myJob.objs = jobSpheres;
+        myJob.res = hits;
     }
 
     private void Render()
     {
-        //temp version 
-        handle = myJob.Schedule(hits.Length, batchCount);
+        //temp version        
+        //handle = myJob.Schedule(hits.Length, batchCount);
     }
 
     private void Update()
     {
-        if(handle.IsCompleted)
+        if(handle.IsCompleted && !bResPrinted)
         {
+            handle.Complete();
             print("!!Done");
             int nx = Screen.width;
             int ny = Screen.height;
@@ -87,11 +96,20 @@ public class JobLoop : MonoBehaviour
             {
                 for (int i = 0; i < nx; i++)
                 {
-                    Vector3 n = hits[j * nx + i].normal;
-                    Color col = new Color(n.x, n.y, n.z);
-                    rtResult.SetPixel(i, j, col);
+                    if (hits[j * nx + i].bHit == 1)
+                    {
+                        Vector3 n = hits[j * nx + i].normal;
+                        Color col = new Color(n.x, n.y, n.z);
+                        rtResult.SetPixel(i, j, col);
+                    }
+                    else
+                    {
+                        rtResult.SetPixel(i, j, Color.cyan);
+                    }
                 }
             }
+            rtResult.Apply();
+            bResPrinted = true;
         }
     }
 

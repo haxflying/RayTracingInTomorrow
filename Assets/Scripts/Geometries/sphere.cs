@@ -34,6 +34,7 @@ public class sphere : Hitable
         float b = Vector3.Dot(oc, r.direction);
         float c = Vector3.Dot(oc, oc) - radius * radius;
         float discriminant = b * b - a * c;
+        Debug.Log("try hit " + discriminant + " " + r.origin + " " + r.direction);
         if (discriminant > 0)
         {
             rec.mat = material;          
