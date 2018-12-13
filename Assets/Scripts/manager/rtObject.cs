@@ -52,6 +52,14 @@ public class rtObject : MonoBehaviour {
         }
     }
 
+    public jSphere toJobSphere()
+    {
+        return new jSphere() {
+            center = transform.position,
+            radius = transform.lossyScale.x / 2f
+        };
+    }
+
     public void DoPreview()
     {
         if (gameObject.name != material.name)

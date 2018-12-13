@@ -74,4 +74,13 @@ public class zCamera {
         float time = time0 + zRandom.drand() * (time1 - time0);
         return new zRay(origin + offset, lower_left_corner + s * horizontal + t * vertical - origin - offset, time);
     }
+
+    public jRay get_jobRay(float s, float t)
+    {
+        return new jRay()
+        {
+            origin = origin,
+            direction = lower_left_corner + s * horizontal + t * vertical - origin
+        };
+    }
 }
