@@ -8,6 +8,7 @@ public class quad : Hitable
     public Vector3 normal;
 
     private Transform trans;
+    private rtAABB aabb;
 
     public quad() { }
 
@@ -28,11 +29,13 @@ public class quad : Hitable
         normal = -transform.forward;
         id = instanceID;
         trans = transform;
+        Bounds bd = trans.GetComponent<Renderer>().bounds;
+        aabb = new rtAABB(bd.min, bd.max);
     }
 
     public override bool bounding_box(float t0, float t1, ref rtAABB box)
     {
-        box = new rtAABB(new Vector3(x0, y0, k - 0.0001f), new Vector3(x1, y1, k + 0.0001f));
+        box = aabb;
         return true;
     }
 
