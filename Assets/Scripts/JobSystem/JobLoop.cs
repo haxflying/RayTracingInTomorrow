@@ -8,17 +8,19 @@ public class JobLoop : MonoBehaviour
 {
     [Range(1, 200)]
     public int ns = 50;
-    public int batchCount = 100;
+    [Range(1, 10)]
+    public int maxBounce = 3;
     
     private Camera cam;
     private Texture2D rtResult;
     private CommandBuffer cb_output;
 
     private NativeArray<jSphere> jobSpheres;
-    private NativeArray<jRay> rays;
+    private NativeArray<jRay> raysBuffer, raysBuffer1;
     private NativeArray<jHitRes> hits;
-    private rtJob myJob;
-    private JobHandle handle;
+    private RaytracingJob initRtJob;
+    private ComputeBounceRayJob matJob;
+    private JobHandle handleRaytracing, handleComputeRay;
     private bool bResPrinted;
 
     private void Start()
@@ -41,7 +43,7 @@ public class JobLoop : MonoBehaviour
 
         bResPrinted = false;
         InitRender();
-        Render();
+        Render(raysBuffer);
     }
 
     private void InitRender()
@@ -49,11 +51,12 @@ public class JobLoop : MonoBehaviour
         int nx = Screen.width;
         int ny = Screen.height;
         int rayCount = nx * ny * ns;
-        rays = new NativeArray<jRay>(rayCount, Allocator.Persistent);
+        raysBuffer = new NativeArray<jRay>(rayCount, Allocator.Persistent);
+        raysBuffer1 = new NativeArray<jRay>(rayCount, Allocator.Persistent);
 
         zCamera zcam = new zCamera(cam);
         uint index = 0;
-        for (int j = 0; j < ny; j++)
+        for (int j = ny - 1; j >= 0; j--)
         {
             for (int i = 0; i < nx; i++)
             {
@@ -61,63 +64,84 @@ public class JobLoop : MonoBehaviour
                 {
                     float u = (float)(i + zRandom.Halton5(index++)) / (float)(nx);
                     float v = (float)(j + zRandom.Halton5(index++)) / (float)(ny);
-                    rays[(j * nx + i) * ns + s] = zcam.get_jobRay(u, v);
+                    raysBuffer[(j * nx + i) * ns + s] = zcam.get_jobRay(u, v);
                 }
             }
         }
+        hits = new NativeArray<jHitRes>(nx * ny, Allocator.Persistent);      
 
-        hits = new NativeArray<jHitRes>(nx * ny, Allocator.Persistent);
-
-        myJob = new rtJob();
-        myJob.batchHitCount = hits.Length / batchCount;
-        myJob.ns = ns;
-        myJob.t_min = 0f;
-        myJob.t_max = 300f;
-        myJob.rays = rays;
-        myJob.objs = jobSpheres;
-        myJob.res = hits;
+        JobGlobal.currentDepth = 0;
     }
 
-    private void Render()
+    private void Render(NativeArray<jRay> buffer)
     {
-        //temp version        
-        //handle = myJob.Schedule(hits.Length, batchCount);
+        initRtJob = new RaytracingJob();
+        initRtJob.ns = ns;
+        initRtJob.t_min = 0f;
+        initRtJob.t_max = 300f;
+        initRtJob.rays = buffer;
+        initRtJob.objs = jobSpheres;
+        initRtJob.res = hits;
+        handleRaytracing = initRtJob.Schedule(hits.Length, 8);
     }
+
+    private void Bounce(NativeArray<jRay> src, NativeArray<jRay> dst)
+    {
+        matJob = new ComputeBounceRayJob();
+        matJob.sourceRay = src;
+        matJob.hits = hits;
+        matJob.bounceRay = dst;
+        handleComputeRay = matJob.Schedule(raysBuffer1.Length, 8);
+    }
+
+    private void OutputRenderResult()
+    {
+        int nx = Screen.width;
+        int ny = Screen.height;
+        for (int j = 0; j < ny; j++)
+        {
+            for (int i = 0; i < nx; i++)
+            {
+                if (hits[j * nx + i].bHit == 1)
+                {
+                    Vector3 n = hits[j * nx + i].normal;
+                    Color col = new Color(n.x, n.y, n.z);
+                    rtResult.SetPixel(i, j, col);
+                }
+                else
+                {
+                    rtResult.SetPixel(i, j, Color.cyan);
+                }
+            }
+        }
+        rtResult.Apply();
+    }   
 
     private void Update()
     {
-        if(handle.IsCompleted && !bResPrinted)
+        if(handleRaytracing.IsCompleted && JobGlobal.currentDepth++ < maxBounce)
         {
-            handle.Complete();
-            print("!!Done");
-            int nx = Screen.width;
-            int ny = Screen.height;
-            for (int j = 0; j < ny; j++)
-            {
-                for (int i = 0; i < nx; i++)
-                {
-                    if (hits[j * nx + i].bHit == 1)
-                    {
-                        Vector3 n = hits[j * nx + i].normal;
-                        Color col = new Color(n.x, n.y, n.z);
-                        rtResult.SetPixel(i, j, col);
-                    }
-                    else
-                    {
-                        rtResult.SetPixel(i, j, Color.cyan);
-                    }
-                }
-            }
-            rtResult.Apply();
-            bResPrinted = true;
+            handleRaytracing.Complete();
+            if(JobGlobal.currentDepth % 2 == 0)
+                Bounce(raysBuffer, raysBuffer1);
+            else
+                Bounce(raysBuffer1, raysBuffer);
+        }
+
+        if(handleComputeRay.IsCompleted)
+        {
+            handleComputeRay.Complete();
         }
     }
+
+
 
     private void OnDisable()
     {
         jobSpheres.Dispose();
-        rays.Dispose();
+        raysBuffer.Dispose();
         hits.Dispose();
+        raysBuffer1.Dispose();
     }
 
     private void OnPreRender()

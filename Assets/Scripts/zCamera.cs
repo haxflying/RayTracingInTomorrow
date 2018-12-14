@@ -69,8 +69,6 @@ public class zCamera {
 
     public zRay get_ray(float s, float t)
     {
-        Debug.Log(s + " " + t);
-        Debug.Log(lower_left_corner + s * horizontal + t * vertical - origin);
         Vector3 rd = lens_radius * Random.insideUnitCircle;
         Vector3 offset = useDoF? u * rd.x + v * rd.y : Vector3.zero;
         float time = time0 + zRandom.drand() * (time1 - time0);
@@ -79,12 +77,11 @@ public class zCamera {
 
     public jRay get_jobRay(float s, float t)
     {
-        Debug.Log(s + " " + t);
-        Debug.Log(lower_left_corner + s * horizontal + t * vertical - origin);
         return new jRay()
         {
             origin = origin,
-            direction = lower_left_corner + s * horizontal + t * vertical - origin
+            direction = lower_left_corner + s * horizontal + t * vertical - origin,
+            bounceCount = 0
         };
     }
 }

@@ -34,7 +34,7 @@ public class sphere : Hitable
         float b = Vector3.Dot(oc, r.direction);
         float c = Vector3.Dot(oc, oc) - radius * radius;
         float discriminant = b * b - a * c;
-        Debug.Log("try hit " + discriminant + " " + r.origin + " " + r.direction);
+        //Debug.Log("try hit " + discriminant + " " + r.origin + " " + r.direction);
         if (discriminant > 0)
         {
             rec.mat = material;          
@@ -45,7 +45,7 @@ public class sphere : Hitable
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
                 rec.lastHit = id;
-
+                Debug.Log("hit");
                 if (DebugDrawer.isDebug)
                 {
                     DebugDrawer.points.Add(rec.p);
@@ -60,7 +60,7 @@ public class sphere : Hitable
                 rec.p = r.point_at_parameter(rec.t);
                 rec.normal = (rec.p - center) / radius;
                 rec.lastHit = id;
-
+                Debug.Log("hit");
                 if (DebugDrawer.isDebug)
                 {
                     DebugDrawer.points.Add(rec.p);
