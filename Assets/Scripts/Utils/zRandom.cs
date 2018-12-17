@@ -25,10 +25,10 @@ public class zRandom {
     }
 
 
-    static uint ii = 0;
     public static Vector3 random_in_unit_sphere()
     {
-        return Random.insideUnitSphere;
+        return new Vector3(drand(), drand(), drand()) * 2 - Vector3.one;
+        //return Random.insideUnitSphere;
         //Vector3 p;
         //do
         //{

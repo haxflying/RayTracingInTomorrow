@@ -7,9 +7,10 @@ using System;
 [Serializable]
 public struct jRay
 {
-    public byte bounceCount;
+    public int bounceCount;
     public Vector3 origin;
     public Vector3 direction;
+    public Color color;
 }
 
 [Serializable]
@@ -29,16 +30,13 @@ public struct jSphere
 
 public static class JobGlobal
 {
+    public static Color envColor;
     public static int currentDepth = 0;
 
-    public static jRay emit(jRay r, jHitRes p, float dist = 0f)
+    public static Vector3 emit(jRay r, jHitRes p, float dist = 0f)
     {
         Vector3 refl = Vector3.Reflect(r.direction, p.normal);
-        return new jRay()
-        {
-            origin = p.point,
-            direction = refl + dist * zRandom.random_in_unit_sphere()
-        };
+        return refl + dist * zRandom.random_in_unit_sphere();
     }
 }
 

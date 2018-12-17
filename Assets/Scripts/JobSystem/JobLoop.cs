@@ -10,18 +10,26 @@ public class JobLoop : MonoBehaviour
     public int ns = 50;
     [Range(1, 10)]
     public int maxBounce = 3;
+    public Color env_Color;
     
     private Camera cam;
     private Texture2D rtResult;
     private CommandBuffer cb_output;
 
+    private jCommonMaterial mat;
+
     private NativeArray<jSphere> jobSpheres;
     private NativeArray<jRay> raysBuffer, raysBuffer1;
+    private NativeArray<Color> colorBuffer, colorBuffer1;
     private NativeArray<jHitRes> hits;
-    private RaytracingJob initRtJob;
+    private RaytracingJob raytracingJob;
     private ComputeBounceRayJob matJob;
-    private JobHandle handleRaytracing, handleComputeRay;
-    private bool bResPrinted;
+    private JobHandle handleRaytracing, handleBounce;
+    private bool bRenderDone;
+    private bool isBouncing;
+
+    private delegate void OnJobComplete();
+    private event OnJobComplete OnRaytraceComplete, OnBounceComplete, OnRenderComplete;
 
     private void Start()
     {
@@ -41,9 +49,33 @@ public class JobLoop : MonoBehaviour
             jobSpheres[i] = objs[i].toJobSphere();
         }
 
-        bResPrinted = false;
+        bRenderDone = false;
         InitRender();
-        Render(raysBuffer);
+
+        for (int i = 0; i < maxBounce; i++)
+        {
+            StepRender();
+        }
+
+        OutputRenderResult();
+    }
+
+    private void StepRender()
+    {
+        if(JobGlobal.currentDepth % 2 == 0)
+        {
+            Render(raysBuffer);
+            Bounce(raysBuffer, raysBuffer1, colorBuffer, colorBuffer1);
+            handleBounce.Complete();
+            JobGlobal.currentDepth++;
+        }
+        else
+        {
+            Render(raysBuffer1);
+            Bounce(raysBuffer1, raysBuffer, colorBuffer1, colorBuffer);
+            handleBounce.Complete();
+            JobGlobal.currentDepth++;
+        }
     }
 
     private void InitRender()
@@ -52,7 +84,7 @@ public class JobLoop : MonoBehaviour
         int ny = Screen.height;
         int rayCount = nx * ny * ns;
         raysBuffer = new NativeArray<jRay>(rayCount, Allocator.Persistent);
-        raysBuffer1 = new NativeArray<jRay>(rayCount, Allocator.Persistent);
+        raysBuffer1 = new NativeArray<jRay>(rayCount, Allocator.Persistent);       
 
         zCamera zcam = new zCamera(cam);
         uint index = 0;
@@ -68,70 +100,98 @@ public class JobLoop : MonoBehaviour
                 }
             }
         }
-        hits = new NativeArray<jHitRes>(nx * ny, Allocator.Persistent);      
+        hits = new NativeArray<jHitRes>(nx * ny, Allocator.Persistent);
+        colorBuffer = new NativeArray<Color>(nx * ny, Allocator.Persistent);
+        colorBuffer1 = new NativeArray<Color>(nx * ny, Allocator.Persistent);
+
+        mat = new jCommonMaterial()
+        {
+            albedo = Color.yellow,
+            distance = 0.2f
+        };
 
         JobGlobal.currentDepth = 0;
+        JobGlobal.envColor = env_Color;
+
+        OnRenderComplete += () => {
+            OutputRenderResult();
+        };
     }
 
     private void Render(NativeArray<jRay> buffer)
     {
-        initRtJob = new RaytracingJob();
-        initRtJob.ns = ns;
-        initRtJob.t_min = 0f;
-        initRtJob.t_max = 300f;
-        initRtJob.rays = buffer;
-        initRtJob.objs = jobSpheres;
-        initRtJob.res = hits;
-        handleRaytracing = initRtJob.Schedule(hits.Length, 8);
+        raytracingJob = new RaytracingJob();
+        raytracingJob.ns = ns;
+        raytracingJob.t_min = 0f;
+        raytracingJob.t_max = 300f;
+        raytracingJob.sourceRays = buffer;
+        raytracingJob.objs = jobSpheres;
+        raytracingJob.res = hits;
+
+        handleRaytracing = raytracingJob.Schedule(hits.Length, 8);
+
+        //OnRaytraceComplete += () =>
+        //{
+        //    if (JobGlobal.currentDepth % 2 == 0)
+        //        Bounce(raysBuffer, raysBuffer1, colorBuffer, colorBuffer1);
+        //    else
+        //        Bounce(raysBuffer1, raysBuffer, colorBuffer1, colorBuffer);
+        //};
+
+        print("Raytracing " + JobGlobal.currentDepth);
     }
 
-    private void Bounce(NativeArray<jRay> src, NativeArray<jRay> dst)
+    private void Bounce(NativeArray<jRay> src, NativeArray<jRay> dst,
+        NativeArray<Color> colorSrc, NativeArray<Color> colorDst)
     {
         matJob = new ComputeBounceRayJob();
+        matJob.ns = ns;
+        matJob.material = mat;
         matJob.sourceRay = src;
         matJob.hits = hits;
         matJob.bounceRay = dst;
-        handleComputeRay = matJob.Schedule(raysBuffer1.Length, 8);
+
+        handleBounce = matJob.Schedule(dst.Length, 8, handleRaytracing);
+
+        //OnBounceComplete += () =>
+        //{
+        //    if (JobGlobal.currentDepth % 2 == 1)
+        //        Render(raysBuffer1);
+        //    else
+        //        Render(raysBuffer);
+        //};
+        //isBouncing = true;
+
+        print("Bouncing " + JobGlobal.currentDepth);
     }
 
     private void OutputRenderResult()
     {
         int nx = Screen.width;
         int ny = Screen.height;
-        for (int j = 0; j < ny; j++)
+        for (int j = ny - 1; j >= 0; j--)
         {
             for (int i = 0; i < nx; i++)
             {
-                if (hits[j * nx + i].bHit == 1)
+                Color col = Color.black;
+                for (int s = 0; s < ns; s++)
                 {
-                    Vector3 n = hits[j * nx + i].normal;
-                    Color col = new Color(n.x, n.y, n.z);
-                    rtResult.SetPixel(i, j, col);
+                    int index = (j * nx + i) * ns + s;
+                    if (JobGlobal.currentDepth % 2 == 1)
+                        col += raysBuffer1[index].color;
+                    else
+                        col += raysBuffer[index].color;
                 }
-                else
-                {
-                    rtResult.SetPixel(i, j, Color.cyan);
-                }
+                col /= ns;
+                rtResult.SetPixel(i, j, col);
             }
         }
         rtResult.Apply();
-    }   
+    }
 
     private void Update()
     {
-        if(handleRaytracing.IsCompleted && JobGlobal.currentDepth++ < maxBounce)
-        {
-            handleRaytracing.Complete();
-            if(JobGlobal.currentDepth % 2 == 0)
-                Bounce(raysBuffer, raysBuffer1);
-            else
-                Bounce(raysBuffer1, raysBuffer);
-        }
-
-        if(handleComputeRay.IsCompleted)
-        {
-            handleComputeRay.Complete();
-        }
+        
     }
 
 
@@ -139,9 +199,11 @@ public class JobLoop : MonoBehaviour
     private void OnDisable()
     {
         jobSpheres.Dispose();
-        raysBuffer.Dispose();
         hits.Dispose();
+        raysBuffer.Dispose();     
         raysBuffer1.Dispose();
+        colorBuffer.Dispose();
+        colorBuffer1.Dispose();
     }
 
     private void OnPreRender()

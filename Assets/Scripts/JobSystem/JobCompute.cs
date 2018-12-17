@@ -11,7 +11,9 @@ public struct RaytracingJob : IJobParallelFor
     
     [ReadOnly]
     public NativeArray<jSphere> objs;
-    public NativeArray<jRay> rays;
+    [ReadOnly]
+    public NativeArray<jRay> sourceRays;
+    [WriteOnly]
     public NativeArray<jHitRes> res;
 
     public void Execute(int index)
@@ -23,33 +25,37 @@ public struct RaytracingJob : IJobParallelFor
         {
             for (int i = 0; i < objs.Length; i++)
             {
-                jRay r = rays[index * ns + s];
-                Vector3 oc = r.origin - objs[i].center;
-                float a = Vector3.Dot(r.direction, r.direction);
-                float b = Vector3.Dot(oc, r.direction);
-                float c = Vector3.Dot(oc, oc) - objs[i].radius * objs[i].radius;
-                float discriminant = b * b - a * c;
-                if (discriminant > 0)
+                int rayIndex = index * ns + s;
+                jRay r = sourceRays[rayIndex];
+                if (r.color != JobGlobal.envColor)
                 {
-                    float temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
-                    if (temp < t_max && temp > t_min)
+                    Vector3 oc = r.origin - objs[i].center;
+                    float a = Vector3.Dot(r.direction, r.direction);
+                    float b = Vector3.Dot(oc, r.direction);
+                    float c = Vector3.Dot(oc, oc) - objs[i].radius * objs[i].radius;
+                    float discriminant = b * b - a * c;
+                    if (discriminant > 0)
                     {
-                        Vector3 p = r.origin + temp * r.direction;
-                        sum_p += p;
-                        sum_n += (p - objs[i].center) / objs[i].radius;
-                        hitAnything = 1;
-                        r.bounceCount++;
+                        float temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
+                        if (temp < t_max && temp > t_min)
+                        {
+                            Vector3 p = r.origin + temp * r.direction;
+                            sum_p += p;
+                            sum_n += (p - objs[i].center) / objs[i].radius;
+                            hitAnything = 1;
+                            break;
+                        }
+                        temp = (-b + Mathf.Sqrt(b * b - a * c)) / a;
+                        if (temp < t_max && temp > t_min)
+                        {
+                            Vector3 p = r.origin + temp * r.direction;
+                            sum_p += p;
+                            sum_n += (p - objs[i].center) / objs[i].radius;
+                            hitAnything = 1;
+                            break;
+                        }
+                        
                     }
-                    temp = (-b + Mathf.Sqrt(b * b - a * c)) / a;
-                    if (temp < t_max && temp > t_min)
-                    {
-                        Vector3 p = r.origin + temp * r.direction;
-                        sum_p += p;
-                        sum_n += (p - objs[i].center) / objs[i].radius;
-                        hitAnything = 1;
-                        r.bounceCount++;
-                    }
-                    break;
                 }
             }
         }

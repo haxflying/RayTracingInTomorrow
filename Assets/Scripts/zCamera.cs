@@ -81,7 +81,8 @@ public class zCamera {
         {
             origin = origin,
             direction = lower_left_corner + s * horizontal + t * vertical - origin,
-            bounceCount = 0
+            bounceCount = 0,
+            color = Color.white
         };
     }
 }
