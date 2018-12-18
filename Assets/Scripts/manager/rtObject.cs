@@ -54,9 +54,16 @@ public class rtObject : MonoBehaviour {
 
     public jSphere toJobSphere()
     {
+        jCommonMaterial mat = new jCommonMaterial()
+        {
+            albedo = material.albedo,
+            distance = 0f
+        };
+
         return new jSphere() {
             center = transform.position,
-            radius = transform.lossyScale.x / 2f
+            radius = transform.lossyScale.x / 2f,
+            mat = mat
         };
     }
 
