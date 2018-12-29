@@ -17,79 +17,43 @@ public struct RaytracingJob : IJobParallelFor
 
     public void Execute(int index)
     {
+        if (sourceRays[index].bAlive == 0)
+        {
+            destRays[index] = new jRay()
+            {
+                bAlive = 0,
+                color = sourceRays[index].color
+            };
+            return;
+        }
+
+        float closestSoFar = t_max;
+        bool hitAnything = false;
         for (int i = 0; i < objs.Length; i++)
         {
-            int rayIndex = index;
-            jRay r = sourceRays[rayIndex];
+            jRay r = sourceRays[index];
             jCommonMaterial material = objs[i].mat;
-            if (r.bAlive == 1)
+            float t = t_max;
+            jRay or = new jRay();
+            if(objs[i].HitSphere(r, t_min, closestSoFar, material, out or, out t))
             {
-                Vector3 oc = r.origin - objs[i].center;
-                float a = Vector3.Dot(r.direction, r.direction);
-                float b = Vector3.Dot(oc, r.direction);
-                float c = Vector3.Dot(oc, oc) - objs[i].radius * objs[i].radius;
-                float discriminant = b * b - a * c;
-                if (discriminant > 0)
-                {
-                    float temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
-                    
-                    if (temp < t_max && temp > t_min)
-                    {
-                        Vector3 p = r.origin + temp * r.direction;
-                        Vector3 n = (p - objs[i].center) / objs[i].radius;
-                        Vector3 refl = JobGlobal.emit(r.direction, n, material.distance);
-
-                        destRays[rayIndex] = new jRay()
-                        {
-                            bAlive = 1,
-                            origin = p,
-                            direction = refl,
-                            color = r.color * material.albedo
-                        };
-                        break;                      
-
-                    }
-
-                    temp = (-b + Mathf.Sqrt(b * b - a * c)) / a;
-                    if(temp < t_max && temp > t_min)
-                    {
-                        Vector3 p = r.origin + temp * r.direction;
-                        Vector3 n = (p - objs[i].center) / objs[i].radius;
-                        Vector3 refl = JobGlobal.emit(r.direction, n, material.distance);
-
-                        destRays[rayIndex] = new jRay()
-                        {
-                            bAlive = 1,
-                            origin = p,
-                            direction = refl,
-                            color = r.color * material.albedo
-                        };
-                        break;
-                        
-                    }
-                }
-                else
-                {
-                    destRays[rayIndex] = new jRay()
-                    {
-                        bAlive = 0,
-                        color = r.color * JobGlobal.envColor
-                    };
-                }
+                hitAnything = true;
+                closestSoFar = t;
+                destRays[index] = or;
             }
-            else
+            
+        }
+       
+        if(!hitAnything)
+        {
+            destRays[index] = new jRay()
             {
-                destRays[rayIndex] = new jRay()
-                {
-                    bAlive = 0,
-                    color = r.color
-                };
-            }
-
+                bAlive = 0,
+                color = sourceRays[index].color * JobGlobal.envColor
+            };
         }
         
     }
-
 
 }
 

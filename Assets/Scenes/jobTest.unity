@@ -334,7 +334,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 516a2f30fc779a749a0ceeb2b9b1b657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ns: 1
+  ns: 100
   maxBounce: 5
   env_Color: {r: 0.8301887, g: 0.8301887, b: 0.8301887, a: 0}
   matColor: {r: 0.37824848, g: 0.6415094, b: 0.46939957, a: 0}
